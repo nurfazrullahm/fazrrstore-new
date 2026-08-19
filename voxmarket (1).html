@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOXMARKET — Item Roblox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12101C;
+    --surface:#1D1930;
+    --surface-alt:#262042;
+    --line:#332C55;
+    --gold:#FFC93C;
+    --legendary:#3CFFA3;
+    --rare:#B388FF;
+    --common:#FF8A6B;
+    --text:#F1EDFF;
+    --muted:#8D87A8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, rgba(179,136,255,0.12), transparent 45%),
+      radial-gradient(circle at 85% 10%, rgba(60,255,163,0.08), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Space Grotesk', sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .pixel{font-family:'Press Start 2P', monospace;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  /* ---- topbar ---- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px 32px;
+    border-bottom:2px solid var(--line);
+    position:sticky; top:0; z-index:50;
+    background:rgba(18,16,28,0.92);
+    backdrop-filter:blur(8px);
+  }
+  .logo{display:flex; align-items:center; gap:12px;}
+  .logo-cube{width:26px; height:26px; position:relative;}
+  .logo-cube .f{position:absolute; width:16px; height:16px;}
+  .logo-cube .top{background:var(--legendary); top:0; left:5px; transform:skew(-25deg,0) scaleY(0.6); }
+  .logo-cube .left{background:var(--gold); top:8px; left:0; transform:skew(0,25deg) scaleX(0.6);}
+  .logo-cube .right{background:var(--rare); top:8px; left:10px; transform:skew(0,-25deg) scaleX(0.6);}
+  .logo-text{font-size:15px; letter-spacing:1px;}
+  .logo-text span{color:var(--gold);}
+
+  .balance{
+    display:flex; align-items:center; gap:18px;
+  }
+  .robux-pill{
+    display:flex; align-items:center; gap:8px;
+    background:var(--surface);
+    border:2px solid var(--line);
+    padding:8px 14px;
+    font-size:13px;
+  }
+  .robux-pill .coin{
+    width:14px; height:14px; background:var(--gold);
+    clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  }
+  .cart-btn{
+    position:relative;
+    background:var(--legendary);
+    color:#0B1F16;
+    border:none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:13px;
+    padding:10px 18px;
+    cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .cart-btn:hover{transform:translateY(-2px);}
+  .cart-count{
+    position:absolute; top:-8px; right:-8px;
+    background:var(--rare); color:#fff;
+    width:20px; height:20px; border-radius:50%;
+    font-size:11px; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace;
+  }
+
+  /* ---- hero ---- */
+  .hero{
+    padding:72px 32px 56px;
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px;
+    align-items:center;
+    max-width:1200px; margin:0 auto;
+  }
+  .eyebrow{
+    color:var(--legendary); font-size:11px; letter-spacing:3px;
+    margin-bottom:18px; display:block;
+  }
+  .hero h1{
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(28px,4vw,44px);
+    line-height:1.5;
+    text-shadow:4px 4px 0 rgba(179,136,255,0.35);
+  }
+  .hero h1 .accent{color:var(--gold);}
+  .hero p{
+    margin-top:22px; color:var(--muted); font-size:16px; max-width:46ch; line-height:1.6;
+  }
+  .hero-actions{margin-top:32px; display:flex; gap:14px;}
+  .btn-primary{
+    background:var(--gold); color:#241A00; border:none;
+    font-weight:700; font-size:14px; padding:14px 26px;
+    cursor:pointer; box-shadow:5px 5px 0 rgba(179,136,255,0.4);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary:hover{transform:translate(-2px,-2px); box-shadow:7px 7px 0 rgba(179,136,255,0.4);}
+  .btn-ghost{
+    background:transparent; color:var(--text); border:2px solid var(--line);
+    font-weight:600; font-size:14px; padding:12px 24px; cursor:pointer;
+  }
+  .btn-ghost:hover{border-color:var(--gold);}
+
+  /* hero voxel display */
+  .hero-vox{
+    display:flex; justify-content:center; align-items:center;
+    perspective:900px;
+  }
+  .vox-stage{
+    position:relative; width:220px; height:220px;
+    transform-style:preserve-3d;
+    animation:spin 9s linear infinite;
+  }
+  @keyframes spin{ from{transform:rotateX(-20deg) rotateY(0deg);} to{transform:rotateX(-20deg) rotateY(360deg);} }
+  .vox-face{
+    position:absolute; width:220px; height:220px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Press Start 2P'; font-size:11px; color:#0B1F16;
+    border:2px solid rgba(0,0,0,0.25);
+  }
+  .vf1{background:var(--legendary); transform:rotateY(0deg) translateZ(110px);}
+  .vf2{background:var(--gold); transform:rotateY(90deg) translateZ(110px);}
+  .vf3{background:var(--rare); transform:rotateY(180deg) translateZ(110px); color:#fff;}
+  .vf4{background:var(--common); transform:rotateY(-90deg) translateZ(110px);}
+  .vf5{background:#E4DFFF; transform:rotateX(90deg) translateZ(110px);}
+  .vf6{background:#4B3F82; transform:rotateX(-90deg) translateZ(110px); color:#fff;}
+
+  /* ---- filter bar ---- */
+  .filter-bar{
+    max-width:1200px; margin:0 auto; padding:0 32px 24px;
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+  }
+  .filter-label{font-size:11px; letter-spacing:2px; color:var(--muted); margin-right:8px;}
+  .pill{
+    background:var(--surface); border:2px solid var(--line); color:var(--muted);
+    font-size:12px; font-weight:600; padding:8px 16px; cursor:pointer;
+    transition:.15s ease;
+  }
+  .pill.active, .pill:hover{color:var(--text); border-color:var(--gold);}
+  .pill[data-rarity="legendary"].active{border-color:var(--legendary); color:var(--legendary);}
+  .pill[data-rarity="rare"].active{border-color:var(--rare); color:var(--rare);}
+  .pill[data-rarity="common"].active{border-color:var(--common); color:var(--common);}
+
+  /* ---- grid ---- */
+  .grid-section{max-width:1200px; margin:0 auto; padding:8px 32px 60px;}
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(230px,1fr)); gap:20px;
+  }
+  .card{
+    background:var(--surface); border:2px solid var(--line);
+    padding:18px; display:flex; flex-direction:column; gap:12px;
+    transition:transform .15s ease, border-color .15s ease;
+  }
+  .card:hover{transform:translateY(-4px); border-color:var(--gold);}
+  .card-icon-wrap{
+    height:130px; display:flex; align-items:center; justify-content:center;
+    background:var(--surface-alt); position:relative; overflow:hidden;
+  }
+  .cube{width:64px; height:64px; position:relative; transform-style:preserve-3d; transform:rotateX(-18deg) rotateY(28deg); transition:transform .4s ease;}
+  .card:hover .cube{transform:rotateX(-18deg) rotateY(200deg);}
+  .cube .cf{position:absolute; width:64px; height:64px; opacity:0.96;}
+  .cube .top{transform:rotateX(90deg) translateZ(32px);}
+  .cube .front{transform:translateZ(32px);}
+  .cube .right{transform:rotateY(90deg) translateZ(32px);}
+
+  .rarity-tag{
+    position:absolute; top:8px; left:8px; font-size:9px; letter-spacing:1px;
+    padding:4px 8px; font-family:'IBM Plex Mono';
+  }
+  .tag-legendary{background:var(--legendary); color:#0B1F16;}
+  .tag-rare{background:var(--rare); color:#fff;}
+  .tag-common{background:var(--common); color:#2B1300;}
+
+  .card h3{font-size:15px; font-weight:600;}
+  .card .cat{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;}
+  .card-footer{display:flex; align-items:center; justify-content:space-between; margin-top:auto;}
+  .price{display:flex; align-items:center; gap:6px; font-family:'IBM Plex Mono'; font-weight:600; color:var(--gold);}
+  .price .coin{width:11px; height:11px; background:var(--gold); clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);}
+  .add-btn{
+    background:var(--surface-alt); border:2px solid var(--line); color:var(--text);
+    font-size:12px; font-weight:700; padding:8px 12px; cursor:pointer;
+  }
+  .add-btn:hover{border-color:var(--legendary); color:var(--legendary);}
+
+  /* ---- cart drawer ---- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(8,7,14,0.6);
+    opacity:0; pointer-events:none; transition:opacity .25s ease; z-index:90;
+  }
+  .overlay.open{opacity:1; pointer-events:auto;}
+  .drawer{
+    position:fixed; top:0; right:0; height:100%; width:380px; max-width:92vw;
+    background:var(--surface); border-left:2px solid var(--line);
+    transform:translateX(100%); transition:transform .3s ease; z-index:100;
+    display:flex; flex-direction:column;
+  }
+  .drawer.open{transform:translateX(0);}
+  .drawer-head{
+    padding:22px 24px; border-bottom:2px solid var(--line);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .drawer-head h2{font-family:'Press Start 2P'; font-size:13px;}
+  .close-btn{background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer;}
+  .close-btn:hover{color:var(--text);}
+  .drawer-items{flex:1; overflow-y:auto; padding:16px 24px; display:flex; flex-direction:column; gap:14px;}
+  .empty-cart{color:var(--muted); font-size:13px; text-align:center; margin-top:40px; line-height:1.6;}
+  .cart-item{display:flex; gap:12px; align-items:center; border-bottom:1px solid var(--line); padding-bottom:14px;}
+  .mini-cube{width:36px; height:36px; flex-shrink:0;}
+  .ci-info{flex:1;}
+  .ci-info h4{font-size:13px; margin-bottom:4px;}
+  .ci-info .mono{font-size:12px; color:var(--gold);}
+  .qty-controls{display:flex; align-items:center; gap:8px;}
+  .qty-controls button{
+    width:22px; height:22px; background:var(--surface-alt); border:1px solid var(--line);
+    color:var(--text); cursor:pointer; font-size:13px;
+  }
+  .remove-x{background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px;}
+  .remove-x:hover{color:var(--common);}
+  .drawer-foot{padding:20px 24px; border-top:2px solid var(--line);}
+  .total-row{display:flex; justify-content:space-between; font-size:14px; margin-bottom:16px;}
+  .total-row .mono{color:var(--gold); font-size:16px; font-weight:700;}
+  .checkout-btn{
+    width:100%; background:var(--gold); color:#241A00; border:none;
+    font-weight:700; font-size:14px; padding:14px; cursor:pointer;
+  }
+  .checkout-btn:hover{background:#ffd76a;}
+  .checkout-btn:disabled{opacity:0.4; cursor:not-allowed;}
+
+  .toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--legendary); color:#0B1F16; padding:12px 22px;
+    font-size:13px; font-weight:700; opacity:0; transition:.25s ease; z-index:200;
+    pointer-events:none;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  footer{
+    max-width:1200px; margin:40px auto 0; padding:24px 32px 0;
+    border-top:2px solid var(--line); color:var(--muted); font-size:12px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+
+  @media (max-width:800px){
+    .hero{grid-template-columns:1fr; padding:48px 20px;}
+    .hero-vox{order:-1;}
+    .topbar{padding:16px 18px;}
+    .grid-section, .filter-bar{padding-left:18px; padding-right:18px;}
+  }
+
+  :focus-visible{outline:2px solid var(--legendary); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    .vox-stage{animation:none;}
+    .cube{transition:none;}
+    *{transition-duration:0.01ms !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-cube"><div class="f top"></div><div class="f left"></div><div class="f right"></div></div>
+    <div class="logo-text pixel">VOX<span>MARKET</span></div>
+  </div>
+  <div class="balance">
+    <div class="robux-pill mono"><div class="coin"></div> 4,250</div>
+    <button class="cart-btn" id="openCart">Keranjang <span class="cart-count" id="cartCount">0</span></button>
+  </div>
+</div>
+
+<section class="hero">
+  <div>
+    <span class="eyebrow pixel">KOLEKSI TERBATAS</span>
+    <h1>LENGKAPI<br>AVATAR-MU<br><span class="accent">JADI LEGEND</span></h1>
+    <p>Item eksklusif, gear langka, dan aksesori limited buat karaktermu di dunia game. Beli sekali, pakai selamanya — tinggal klik, item langsung nempel ke avatar.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('katalog').scrollIntoView({behavior:'smooth'})">Lihat Katalog</button>
+      <button class="btn-ghost" onclick="document.querySelector('[data-rarity=legendary]').click()">Item Legendary</button>
+    </div>
+  </div>
+  <div class="hero-vox">
+    <div class="vox-stage">
+      <div class="vox-face vf1">LEGENDARY</div>
+      <div class="vox-face vf2">GOLD</div>
+      <div class="vox-face vf3">RARE</div>
+      <div class="vox-face vf4">COMMON</div>
+      <div class="vox-face vf5">VOX</div>
+      <div class="vox-face vf6">MARKET</div>
+    </div>
+  </div>
+</section>
+
+<div class="filter-bar" id="katalog">
+  <span class="filter-label pixel">FILTER</span>
+  <button class="pill active" data-rarity="all">Semua</button>
+  <button class="pill" data-rarity="legendary">Legendary</button>
+  <button class="pill" data-rarity="rare">Rare</button>
+  <button class="pill" data-rarity="common">Common</button>
+</div>
+
+<section class="grid-section">
+  <div class="grid" id="itemGrid"></div>
+</section>
+
+<footer>
+  <span class="pixel" style="font-size:10px;">VOXMARKET</span>
+  <span>Toko demo — dibuat untuk keperluan contoh, bukan afiliasi resmi Roblox Corporation.</span>
+</footer>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <h2 class="pixel">KERANJANG</h2>
+    <button class="close-btn" id="closeCart">&times;</button>
+  </div>
+  <div class="drawer-items" id="drawerItems"></div>
+  <div class="drawer-foot">
+    <div class="total-row"><span>Total</span><span class="mono" id="totalPrice">R$ 0</span></div>
+    <button class="checkout-btn" id="checkoutBtn" disabled>Checkout Sekarang</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const ITEMS = [
+  {id:1, name:"Crown of the Void", cat:"Topi", rarity:"legendary", price:1800, colors:["#3CFFA3","#2ED88C","#1FA870"]},
+  {id:2, name:"Phoenix Wings", cat:"Sayap", rarity:"legendary", price:2200, colors:["#FFC93C","#E6AC1E","#B8850F"]},
+  {id:3, name:"Shadow Blade", cat:"Senjata", rarity:"legendary", price:1500, colors:["#B388FF","#8F5FE0","#6B3FBF"]},
+  {id:4, name:"Neon Visor", cat:"Wajah", rarity:"rare", price:650, colors:["#B388FF","#9569E8","#7A4FD0"]},
+  {id:5, name:"Storm Cape", cat:"Punggung", rarity:"rare", price:780, colors:["#8FD3FF","#5FB6EE","#3E93D0"]},
+  {id:6, name:"Golden Backpack", cat:"Punggung", rarity:"rare", price:590, colors:["#FFC93C","#E0A82A","#C08A18"]},
+  {id:7, name:"Iron Boots", cat:"Kaki", rarity:"common", price:150, colors:["#FF8A6B","#E86A4D","#C64F35"]},
+  {id:8, name:"Classic Cap", cat:"Topi", rarity:"common", price:90, colors:["#FF8A6B","#E86A4D","#C64F35"]},
+  {id:9, name:"Wooden Shield", cat:"Senjata", rarity:"common", price:120, colors:["#FF8A6B","#E86A4D","#C64F35"]},
+  {id:10, name:"Star Halo", cat:"Topi", rarity:"legendary", price:2000, colors:["#3CFFA3","#2ED88C","#1FA870"]},
+  {id:11, name:"Toxic Slime Pet", cat:"Peliharaan", rarity:"rare", price:700, colors:["#B388FF","#9569E8","#7A4FD0"]},
+  {id:12, name:"Basic Backpack", cat:"Punggung", rarity:"common", price:80, colors:["#FF8A6B","#E86A4D","#C64F35"]},
+];
+
+let cart = {}; // id -> qty
+let activeFilter = "all";
+
+function cubeHTML(colors){
+  return `<div class="cube">
+    <div class="cf top" style="background:${colors[0]}"></div>
+    <div class="cf front" style="background:${colors[1]}"></div>
+    <div class="cf right" style="background:${colors[2]}"></div>
+  </div>`;
+}
+
+function renderGrid(){
+  const grid = document.getElementById('itemGrid');
+  const list = activeFilter === 'all' ? ITEMS : ITEMS.filter(i => i.rarity === activeFilter);
+  grid.innerHTML = list.map(item => `
+    <div class="card">
+      <div class="card-icon-wrap">
+        <span class="rarity-tag tag-${item.rarity}">${item.rarity.toUpperCase()}</span>
+        ${cubeHTML(item.colors)}
+      </div>
+      <div class="cat">${item.cat}</div>
+      <h3>${item.name}</h3>
+      <div class="card-footer">
+        <div class="price"><div class="coin"></div>${item.price.toLocaleString('id-ID')}</div>
+        <button class="add-btn" onclick="addToCart(${item.id})">+ Tambah</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addToCart(id){
+  cart[id] = (cart[id] || 0) + 1;
+  updateCartUI();
+  const item = ITEMS.find(i => i.id === id);
+  showToast(`${item.name} ditambahkan ke keranjang`);
+}
+
+function changeQty(id, delta){
+  if(!cart[id]) return;
+  cart[id] += delta;
+  if(cart[id] <= 0) delete cart[id];
+  updateCartUI();
+}
+
+function removeItem(id){
+  delete cart[id];
+  updateCartUI();
+}
+
+function updateCartUI(){
+  const ids = Object.keys(cart);
+  const count = ids.reduce((sum, id) => sum + cart[id], 0);
+  document.getElementById('cartCount').textContent = count;
+
+  const drawerItems = document.getElementById('drawerItems');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+
+  if(ids.length === 0){
+    drawerItems.innerHTML = `<div class="empty-cart">Keranjang masih kosong.<br>Yuk pilih item dari katalog!</div>`;
+    checkoutBtn.disabled = true;
+  } else {
+    checkoutBtn.disabled = false;
+    drawerItems.innerHTML = ids.map(id => {
+      const item = ITEMS.find(i => i.id == id);
+      const qty = cart[id];
+      return `
+        <div class="cart-item">
+          <div class="mini-cube">${cubeHTML(item.colors)}</div>
+          <div class="ci-info">
+            <h4>${item.name}</h4>
+            <div class="mono">R$ ${(item.price*qty).toLocaleString('id-ID')}</div>
+            <div class="qty-controls">
+              <button onclick="changeQty(${item.id},-1)">-</button>
+              <span class="mono">${qty}</span>
+              <button onclick="changeQty(${item.id},1)">+</button>
+            </div>
+          </div>
+          <button class="remove-x" onclick="removeItem(${item.id})" aria-label="Hapus item">&times;</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  const total = ids.reduce((sum, id) => sum + ITEMS.find(i => i.id == id).price * cart[id], 0);
+  document.getElementById('totalPrice').textContent = `R$ ${total.toLocaleString('id-ID')}`;
+}
+
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// filter pills
+document.querySelectorAll('.pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    activeFilter = pill.dataset.rarity;
+    renderGrid();
+  });
+});
+
+// drawer open/close
+const drawer = document.getElementById('drawer');
+const overlay = document.getElementById('overlay');
+document.getElementById('openCart').addEventListener('click', () => { drawer.classList.add('open'); overlay.classList.add('open'); });
+document.getElementById('closeCart').addEventListener('click', () => { drawer.classList.remove('open'); overlay.classList.remove('open'); });
+overlay.addEventListener('click', () => { drawer.classList.remove('open'); overlay.classList.remove('open'); });
+
+document.getElementById('checkoutBtn').addEventListener('click', () => {
+  showToast('Checkout berhasil! Item akan masuk ke inventory-mu.');
+  cart = {};
+  updateCartUI();
+  setTimeout(() => { drawer.classList.remove('open'); overlay.classList.remove('open'); }, 900);
+});
+
+renderGrid();
+updateCartUI();
+</script>
+</body>
+</html>
